@@ -132,4 +132,44 @@ def test_duplicate_task_title_returns_409(client):
     assert second_response.json()["detail"] == (
         "A task with that title already exists"
     )
-                                                   
+
+#Tests added below for test coverage report                                                
+def test_patch_nonexistent_task_returns_404(client):
+    #Arrange
+    task_id = 9999
+
+    #Act
+    response = client.patch(
+        f"/tasks/{task_id}", 
+        json={"completed": True},
+    )
+    #Assert
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Task 9999 not found"
+
+def test_delete_nonexistent_task_returns_404(client):
+    #Arrange
+    task_id = 9999
+
+    #Act
+    response = client.delete(f"/tasks/{task_id}")
+
+    #Assert
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Task 9999 not found"
+
+def test_create_task_title_too_long_returns_422(client):
+    #Arrange
+    invalid_task = {
+        "title": "A" * 201
+    }
+
+    #Act
+    response = client.post(
+        "/tasks/", 
+        json=invalid_task,
+    )
+
+    #Assert
+    assert response.status_code == 422
+    assert "detail" in response.json()
